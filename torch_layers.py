@@ -9,8 +9,8 @@ import numpy as np
 # local packages - use conda develop
 import torch_utils
 
-device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-print("device is: " + str(device))
+# device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+# print("device is: " + str(device))
 
 class PiecewiseReLU(nn.Module):
     def __init__(self):
@@ -53,17 +53,17 @@ class Mix(nn.Module):
         return sig_mix * A + (1 - sig_mix) * B
 
 class Interleaved(nn.Module):
-    def __init__(self, N, kernel_size=5, num_convs=1, shift=False, hyp_conv=False, device=device):
+    def __init__(self, N, kernel_size=5, num_convs=1, shift=False, hyp_conv=False):
         super().__init__()
         self.features = N
         self.kernel_size = kernel_size
         self.num_convs = num_convs
         self.shift = shift
         self.hyp_conv = hyp_conv
-        self.img_mix = Mix().to(device)
-        self.freq_mix = Mix().to(device)
-        self.img_bnconvs = [BatchNormConv(N, N, kernel_size=kernel_size, hyp_conv=hyp_conv).to(device) for i in range(num_convs)]
-        self.freq_bnconvs = [BatchNormConv(N, N, kernel_size=kernel_size, hyp_conv=hyp_conv).to(device) for i in range(num_convs)]
+        self.img_mix = Mix()
+        self.freq_mix = Mix()
+        self.img_bnconvs = nn.ModuleList([BatchNormConv(N, N, kernel_size=kernel_size, hyp_conv=hyp_conv) for i in range(num_convs)])
+        self.freq_bnconvs = nn.ModuleList([BatchNormConv(N, N, kernel_size=kernel_size, hyp_conv=hyp_conv) for i in range(num_convs)])
         self.relu = nn.ReLU()
         self.p_relu = PiecewiseReLU()
         
